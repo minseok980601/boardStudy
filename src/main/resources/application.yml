@@ -1,0 +1,38 @@
+--- # Configuration Port
+server:
+  port: 8081
+
+--- # Configuration MVC
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+
+--- # Configuration Devtools
+spring:
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: false
+
+--- # Configuration MySql
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/boot
+    username: boot
+    password: boot
+
+--- # Configuration MyBatis
+mybatis:
+  mapper-locations: classpath:sqlmapper/**/*.xml
+
+spring:
+  mvc:
+    static-path-pattern: /static/**
+
+custom:
+  path:
+    upload-images: /images/**

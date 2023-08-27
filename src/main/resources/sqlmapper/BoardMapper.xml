@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.boardstudy.dao.BoardDAO">
+
+<!--    <select id="selectBoardList">-->
+<!--        SELECT board_idx, title, contents, DATE_FORMAT(created_datetime, '%Y.%m.%d %H:%i:%s') AS created_datetime, creator_id-->
+<!--        FROM test2_board-->
+<!--        ORDER BY board_idx DESC-->
+<!--    </select>-->
+
+    <select id="selectBoardList">
+        SELECT board_idx, title, contents, DATE_FORMAT(created_datetime, '%Y.%m.%d %H:%i:%s') AS created_datetime, creator_id
+        FROM (
+                SELECT board_idx, title, contents, DATE_FORMAT(created_datetime, '%Y.%m.%d %H:%i:%S') AS created_datetime, creator_id
+                FROM test2_board
+                <if test="keyword != null">
+                WHERE title LIKE CONCAT ('%', #{keyword}, '%')
+                </if>
+                ORDER BY board_idx desc
+              ) AS test2_board
+        LIMIT #{skip}, #{amount}
+    </select>
+
+    <select id="getBoardTotal" resultType="int">
+        SELECT COUNT(*) as total
+        FROM test2_board
+        <if test="keyword != null">
+            WHERE title LIKE CONCAT ('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <insert id="sucInsertBoard" useGeneratedKeys="true" keyProperty="board_idx">
+        INSERT INTO test2_board(title, contents, created_datetime, creator_id)
+        VALUES(#{title}, #{contents}, NOW(), 'admin')
+    </insert>
+
+    <insert id="sucInsertFile">
+        INSERT INTO test2_file (board_idx, original_file_name, stored_file_path, file_size, creator_id, created_datetime)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.board_idx}, #{item.original_file_name}, #{item.stored_file_path}, #{item.file_size}, 'admin', NOW())
+        </foreach>
+    </insert>
+
+    <select id="showBoard">
+        SELECT title, contents, DATE_FORMAT(created_datetime, '%Y.%m.%d %H:%i:%s') AS created_datetime, creator_id
+        FROM test2_board
+        WHERE board_idx = #{board_idx}
+    </select>
+
+    <select id="showBoardFileList" parameterType="int" resultType="com.example.boardstudy.dto.BoardFileDTO">
+        SELECT idx, board_idx, original_file_name, stored_file_path, FORMAT(ROUND(file_size / 1024), 0) AS file_size
+        FROM test2_file
+        WHERE board_idx = #{board_idx}
+    </select>
+
+    <select id="loginMember">
+        SELECT *
+        FROM test2_member
+        WHERE memID = #{memID} AND memPassword = #{memPassword}
+    </select>
+
+    <insert id="register">
+        INSERT INTO test2_member(memID, memPassword, memName, memAge, memGender, memEmail, memProfile)
+        VALUES (#{memID}, #{memPassword}, #{memName}, #{memAge}, #{memGender}, #{memEmail}, #{memProfile})
+    </insert>
+    
+    <select id="registerCheck">
+        SELECT *
+        FROM test2_member
+        WHERE memID = #{memID}
+    </select>
+
+</mapper>
